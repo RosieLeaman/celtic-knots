@@ -17,22 +17,37 @@ function nextPoint(posX,posY,prevDirectionX,prevDirectionY,xMax,yMax){
 }
 
 function makePathFrom(initialPointX,initialPointY,xMax,yMax,startFlip){
+  // if we are back where we started then we have finished
+  var maxVisits = 1;
+
+  // the curves don't curve properly from the top line
+  // if you start from top line, so start from slightly further back
+  if (initialPointX == 1){
+    initialPointY = 2
+    maxVisits = 2
+  }
+  // because we start at a more central location we have to come back twice
+  // to be complete
+  if (initialPointX == xMax){
+    initialPointX = initialPointX - 2;
+    maxVisits = 2
+  }
+
   var posX = initialPointX;
   var posY = initialPointY;
   var prevDirectionX = 1;
   var prevDirectionY = 1;
 
-  // var lineData = [{"x":posX,"y":posY}];
-  var lineData = [];
+  var lineData = [{"x":posX,"y":posY}];
 
   // decided to pass startFlip in case don't want to start with an over weave
   // but with the current approach of going along top line not sure it is necessary
   // as all top lines go over?
   var flip = startFlip;
 
-  var finished = false
-
-  while (finished == false){
+  var repeatedVisits = 0
+  while (repeatedVisits < maxVisits){
+    console.log(posX + ' ' + posY)
 
     var next = nextPoint(posX,posY,prevDirectionX,prevDirectionY,xMax,yMax);
 
@@ -54,29 +69,9 @@ function makePathFrom(initialPointX,initialPointY,xMax,yMax,startFlip){
     }
 
     if (posX == initialPointX & posY == initialPointY){
-      finished = true
+      repeatedVisits = repeatedVisits + 1
     }
 
-  }
-
-  // have to repeat one more step once complete to get the loop to complete
-  var next = nextPoint(posX,posY,prevDirectionX,prevDirectionY,xMax,yMax);
-
-  posX = next[0],posY = next[1], prevDirectionX = next[2], prevDirectionY = next[3];
-
-  if (posX > 0 & posX < xMax-1 & posY > 0 & posY < yMax-1){
-    if (flip == 1){
-      lineData.push({"x":posX-0.2*prevDirectionX,"y":posY-0.2*prevDirectionY})
-      lineData.push({"x":null,"y":null})
-      lineData.push({"x":posX+0.2*prevDirectionX,"y":posY+0.2*prevDirectionY})
-    }
-    else{
-      lineData.push({"x":posX,"y":posY})
-    }
-    flip = -flip
-  }
-  else{
-    lineData.push({"x":posX,"y":posY})
   }
 
   return lineData
@@ -115,6 +110,8 @@ function makePath(xMax,yMax){
     initialPointX = findNextEdgePoint(lines,xMax)
   }
 
+  // lines.push(makePathFrom(initialPointX,initialPointY,2*xMax-1,2*yMax-1,1))
+
 
   return lines
 }
@@ -141,14 +138,14 @@ function drawPath(lineData,gapX,gapY,colour){
   var lineGraph = svgContainer.append("path")
                               .attr("d", lineFunction(lineDataCopy))
                               .attr("stroke", colour)
-                              .attr("stroke-width", 2)
+                              .attr("stroke-width", 5)
                               .attr("fill", "none");
 }
 
 function drawAllPaths(lines,gapX,gapY){
   colourCycle = ["blue","red","black"]
   for (var i=0;i<lines.length;i++){
-    drawPath(lines[i],gapX,gapY,colourCycle[i])
+    drawPath(lines[i],gapX,gapY,colourCycle[i%3])
   }
 }
 
@@ -174,8 +171,32 @@ function drawCircles(sizeX,sizeY,gapX,gapY){
          })
 }
 
-var sizeX = 3
-var sizeY = 20
+function getValues(){
+  // note have to add 1 to the x and y size as user specifies num boxes whereas
+  // code works off num fenceposts
+  var sizeX = parseInt(document.getElementById("sizeX").value) + 1;
+  var sizeY = parseInt(document.getElementById("sizeY").value) + 1;
+
+  var gapX = parseInt(document.getElementById("gapX").value)
+  var gapY = parseInt(document.getElementById("gapY").value)
+
+  // remove previous svg
+  d3.select("svg").remove()
+
+  // make new
+  svgContainer = d3.select("body")
+                   .append("svg")
+                   .attr("width",(sizeX-1)*gapX)
+                   .attr("height",(sizeY-1)*gapY)
+
+  // make the line path
+  var linePaths = makePath(sizeX,sizeY)
+
+  drawAllPaths(linePaths,gapX/2,gapY/2)
+}
+
+var sizeX = 7
+var sizeY = 6
 var gapX = 50
 var gapY = 50
 
@@ -184,7 +205,7 @@ svgContainer = d3.select("body")
                  .attr("width",(sizeX-1)*gapX)
                  .attr("height",(sizeY-1)*gapY)
 
-// make the line path
-var linePaths = makePath(sizeX,sizeY)
+                 // make the line path
+                 var linePaths = makePath(sizeX,sizeY)
 
-drawAllPaths(linePaths,gapX/2,gapY/2)
+                 drawAllPaths(linePaths,gapX/2,gapY/2)

@@ -3,8 +3,18 @@
 <body>
 
 <h1>
-HELLO THERE
+Celtic knot generator
 </h1>
+
+<div class="controls">
+    Horizontal size:<input type="text" id="sizeX" value="6"/>
+    Vertical size:<input type="text" id="sizeY" value="5"/>
+    <br></br>
+    Horizontal box width:<input type="text" id="gapX" value="50"/>
+    Vertical box width:<input type="text" id="gapY" value="50"/>
+    <br></br>
+    <button onclick="getValues()">Make knot!</button>
+</div>
 
 
 <script src="https://d3js.org/d3.v5.min.js"></script>
