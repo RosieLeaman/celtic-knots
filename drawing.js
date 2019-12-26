@@ -17,26 +17,27 @@ function nextPoint(posX,posY,prevDirectionX,prevDirectionY,xMax,yMax){
 }
 
 function makePathFrom(initialPointX,initialPointY,xMax,yMax,startFlip){
-  // if we are back where we started then we have finished
-  var maxVisits = 1;
-
-  // the curves don't curve properly from the top line
-  // if you start from top line, so start from slightly further back
-  if (initialPointX == 1){
-    initialPointY = 2
-    maxVisits = 2
-  }
-  // because we start at a more central location we have to come back twice
+  // if we are back where we started then we have finished, we have to come back twice
   // to be complete
-  if (initialPointX == xMax){
+  var maxVisits = 2;
+  var prevDirectionX = 1;
+  var prevDirectionY = -1;
+
+  // to get the right curve from first point starts in a different orientation
+  if (initialPointX == 1){
+    initialPointY = 2;
+    prevDirectionX = -1;
+    prevDirectionY = -1;
+  }
+  else if (initialPointX == xMax){
     initialPointX = initialPointX - 2;
-    maxVisits = 2
+  }
+  else{
+    initialPointX = initialPointX - 1;
   }
 
   var posX = initialPointX;
   var posY = initialPointY;
-  var prevDirectionX = 1;
-  var prevDirectionY = 1;
 
   var lineData = [{"x":posX,"y":posY}];
 
@@ -47,31 +48,28 @@ function makePathFrom(initialPointX,initialPointY,xMax,yMax,startFlip){
 
   var repeatedVisits = 0
   while (repeatedVisits < maxVisits){
-    console.log(posX + ' ' + posY)
-
     var next = nextPoint(posX,posY,prevDirectionX,prevDirectionY,xMax,yMax);
 
     posX = next[0],posY = next[1], prevDirectionX = next[2], prevDirectionY = next[3];
 
     if (posX > 0 & posX < xMax-1 & posY > 0 & posY < yMax-1){
       if (flip == 1){
-        lineData.push({"x":posX-0.2*prevDirectionX,"y":posY-0.2*prevDirectionY})
-        lineData.push({"x":null,"y":null})
-        lineData.push({"x":posX+0.2*prevDirectionX,"y":posY+0.2*prevDirectionY})
+        lineData.push({"x":posX-0.2*prevDirectionX,"y":posY-0.2*prevDirectionY});
+        lineData.push({"x":null,"y":null});
+        lineData.push({"x":posX+0.2*prevDirectionX,"y":posY+0.2*prevDirectionY});
       }
       else{
-        lineData.push({"x":posX,"y":posY})
+        lineData.push({"x":posX,"y":posY});
       }
-      flip = -flip
+      flip = -flip;
     }
     else{
-      lineData.push({"x":posX,"y":posY})
+      lineData.push({"x":posX,"y":posY});
     }
 
     if (posX == initialPointX & posY == initialPointY){
-      repeatedVisits = repeatedVisits + 1
+      repeatedVisits = repeatedVisits + 1;
     }
-
   }
 
   return lineData
@@ -80,13 +78,13 @@ function makePathFrom(initialPointX,initialPointY,xMax,yMax,startFlip){
 function findNextEdgePoint(lines,xMax){
   // investigate the top line, if all points have been visited (if region has no holes) then we are done
   for (var x=1;x<2*xMax-1;x=x+2){
-    var found = false
+    var found = false;
     for (var i=0;i<lines.length;i++){
       // check each line
       for (var j=0;j<lines[i].length;j++){
         // check each point
         if (lines[i][j].y == 0 & lines[i][j].x == x){
-          found = true
+          found = true;
           break
         }
       }
@@ -99,19 +97,16 @@ function findNextEdgePoint(lines,xMax){
 }
 
 function makePath(xMax,yMax){
-  var lines = []
+  var lines = [];
 
-  var initialPointY = 0
+  var initialPointY = 1;
 
-  initialPointX = findNextEdgePoint(lines,xMax)
+  initialPointX = findNextEdgePoint(lines,xMax);
 
   while (initialPointX !== null){
-    lines.push(makePathFrom(initialPointX,initialPointY,2*xMax-1,2*yMax-1,1))
-    initialPointX = findNextEdgePoint(lines,xMax)
+    lines.push(makePathFrom(initialPointX,initialPointY,2*xMax-1,2*yMax-1,1));
+    initialPointX = findNextEdgePoint(lines,xMax);
   }
-
-  // lines.push(makePathFrom(initialPointX,initialPointY,2*xMax-1,2*yMax-1,1))
-
 
   return lines
 }
@@ -121,10 +116,10 @@ function drawPath(lineData,gapX,gapY,colour){
   lineDataCopy = []
   for (var i=0;i<lineData.length;i++){
     if (lineData[i].x !== null){
-      lineDataCopy.push({'x':lineData[i].x*gapX,'y':lineData[i].y*gapY})
+      lineDataCopy.push({'x':lineData[i].x*gapX,'y':lineData[i].y*gapY});
     }
     else{
-      lineDataCopy.push({'x':null,'y':null})
+      lineDataCopy.push({'x':null,'y':null});
     }
   }
 
@@ -145,14 +140,14 @@ function drawPath(lineData,gapX,gapY,colour){
 function drawAllPaths(lines,gapX,gapY){
   colourCycle = ["blue","red","black"]
   for (var i=0;i<lines.length;i++){
-    drawPath(lines[i],gapX,gapY,colourCycle[i%3])
+    drawPath(lines[i],gapX,gapY,colourCycle[i%3]);
   }
 }
 
 function drawCircles(sizeX,sizeY,gapX,gapY){
   var circleRadii = []
   for (var i=0;i<sizeX*sizeY;i++){
-    circleRadii.push(5)
+    circleRadii.push(5);
   }
 
   circles = svgContainer.selectAll("circle")
@@ -177,8 +172,8 @@ function getValues(){
   var sizeX = parseInt(document.getElementById("sizeX").value) + 1;
   var sizeY = parseInt(document.getElementById("sizeY").value) + 1;
 
-  var gapX = parseInt(document.getElementById("gapX").value)
-  var gapY = parseInt(document.getElementById("gapY").value)
+  var gapX = parseInt(document.getElementById("gapX").value);
+  var gapY = parseInt(document.getElementById("gapY").value);
 
   // remove previous svg
   d3.select("svg").remove()
