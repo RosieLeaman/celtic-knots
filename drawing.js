@@ -167,6 +167,10 @@ function getValues(){
   var gapX = parseInt(document.getElementById("gapX").value);
   var gapY = parseInt(document.getElementById("gapY").value);
 
+  // get out of edit mode and remove the edit button if present so it doesn't screw stuff up
+  d3.select(".controls").classed("edit-mode",false)
+  d3.select(".edit-button").remove()
+
   // remove previous svg
   d3.select("svg").remove()
 
@@ -226,8 +230,8 @@ function showGrid(){
       })
   }
   else{
-    d3.select(".edit-button")
-      .remove()
+    d3.select(".controls").classed("edit-mode",false);
+    d3.select(".edit-button").remove()
   }
 
   // draw the lines
