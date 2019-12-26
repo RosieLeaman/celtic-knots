@@ -190,6 +190,48 @@ function getValues(){
   drawAllPaths(linePaths,gapX/2,gapY/2)
 }
 
+function showGrid(){
+  var sizeX = parseInt(document.getElementById("sizeX").value) + 1;
+  var sizeY = parseInt(document.getElementById("sizeY").value) + 1;
+
+  var gapX = parseInt(document.getElementById("gapX").value);
+  var gapY = parseInt(document.getElementById("gapY").value);
+
+
+  var lines = [];
+
+  // if no lines are being shown, add the lines
+  var numLines = d3.select("svg").selectAll(".grid").size();
+
+  if (numLines == 0){
+    for (var i=0;i<=sizeX;i++){
+      lines.push([{'x':gapX*i,'y':0},{'x':gapX*i,'y':gapY*sizeY}]);
+    }
+    for (var i=0;i<=sizeY;i++){
+      lines.push([{'x':0,'y':gapY*i},{'x':gapX*sizeX,'y':gapY*i}]);
+    }
+  }
+
+  // draw the lines
+  var lineFunction = d3.line()
+                       .x(function(d) { return d.x; })
+                       .y(function(d) { return d.y; })
+
+  gridLines = d3.select("svg").selectAll(".grid")
+                .data(lines)
+
+  gridLines.exit().remove()
+
+  gridLines.enter().append("path")
+            .attr("d", function(d){
+              return lineFunction(d);
+            })
+            .attr("stroke", "black")
+            .attr("stroke-width", 1)
+            .attr("fill", "none")
+            .attr("class","grid")
+}
+
 var sizeX = 7
 var sizeY = 6
 var gapX = 50
