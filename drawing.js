@@ -9,17 +9,58 @@ function pointsAreEqual(point1,point2){
   return false
 }
 
+function convertGridPointsToKnotPoints(list){
+  var pointsReflectX = [];
+  var pointsReflectY = [];
+  for (var i=0;i < list.length; i ++){
+    var x = list[i][0];
+    var y = list[i][1];
+
+    pointsReflectY.push([2*x,2*y+1])
+    pointsReflectY.push([2*(x+1),2*y+1])
+
+    pointsReflectX.push([2*x+1,2*y])
+    pointsReflectX.push([2*x+1,2*(y+1)])
+  }
+
+  return [pointsReflectX,pointsReflectY]
+}
+
 function nextPoint(posX,posY,prevDirectionX,prevDirectionY,xMax,yMax){
+  // var gridPoints = [[1,1]];
+  var gridPoints = [];
+  var convertedGridPoints = convertGridPointsToKnotPoints(gridPoints);
+  var pointsReflectX = convertedGridPoints[0];
+  var pointsReflectY = convertedGridPoints[1];
+
+  console.log(posX + ' ' + posY + ' ' + prevDirectionX + ' ' + prevDirectionY)
+
+  // deal with reflecting in x
+  if (posX + prevDirectionX >= xMax - 1 | posX + prevDirectionX <= 0){
+    return [posX + prevDirectionX,posY + prevDirectionY,-prevDirectionX,prevDirectionY,false]
+  }
+  for (var i=0;i<pointsReflectX.length;i++){
+    if (pointsAreEqual([posX + prevDirectionX, posY + prevDirectionY],pointsReflectX[i])){
+      return [posX + prevDirectionX,posY + prevDirectionY,prevDirectionX,-prevDirectionY,false]
+    }
+  }
+
+  // deal with reflecting in y
+  if (posY + prevDirectionY >= yMax - 1 | posY + prevDirectionY <= 0){
+    return [posX + prevDirectionX,posY + prevDirectionY,prevDirectionX,-prevDirectionY,false]
+  }
+  for (var i=0;i<pointsReflectY.length;i++){
+    if (pointsAreEqual([posX + prevDirectionX, posY + prevDirectionY],pointsReflectY[i])){
+      return [posX + prevDirectionX,posY + prevDirectionY,-prevDirectionX,prevDirectionY,false]
+    }
+  }
+
   // if currentDirection is fine then move along
-  if (posX + prevDirectionX < xMax & posX + prevDirectionX >= 0 & posY + prevDirectionY < yMax & posY + prevDirectionY >= 0){
-    return [posX + prevDirectionX,posY + prevDirectionY,prevDirectionX,prevDirectionY]
+  if (posX + prevDirectionX < xMax  - 1 & posX + prevDirectionX > 0 & posY + prevDirectionY < yMax  - 1 & posY + prevDirectionY > 0){
+    return [posX + prevDirectionX,posY + prevDirectionY,prevDirectionX,prevDirectionY,true]
   }
-  if (posX + prevDirectionX >= xMax | posX + prevDirectionX < 0){
-    return [posX - prevDirectionX,posY + prevDirectionY,-prevDirectionX,prevDirectionY]
-  }
-  if (posY + prevDirectionY >= yMax | posY + prevDirectionY < 0){
-    return [posX + prevDirectionX,posY - prevDirectionY,prevDirectionX,-prevDirectionY]
-  }
+
+  // something has gone wrong
   return null
 }
 
@@ -56,10 +97,11 @@ function makePathFrom(initialPointX,initialPointY,xMax,yMax,startFlip){
   var repeatedVisits = 0
   while (repeatedVisits < maxVisits){
     var next = nextPoint(posX,posY,prevDirectionX,prevDirectionY,xMax,yMax);
+    console.log(next)
 
-    posX = next[0],posY = next[1], prevDirectionX = next[2], prevDirectionY = next[3];
+    posX = next[0],posY = next[1], prevDirectionX = next[2], prevDirectionY = next[3],toFlip = next[4];
 
-    if (posX > 0 & posX < xMax-1 & posY > 0 & posY < yMax-1){
+    if (toFlip == true){
       if (flip == 1){
         lineData.push({"x":posX-0.2*prevDirectionX,"y":posY-0.2*prevDirectionY});
         lineData.push({"x":null,"y":null});
@@ -114,6 +156,8 @@ function makePath(xMax,yMax){
     lines.push(makePathFrom(initialPointX,initialPointY,2*xMax-1,2*yMax-1,1));
     initialPointX = findNextEdgePoint(lines,xMax);
   }
+
+  // lines.push(makePathFrom(initialPointX,initialPointY,2*xMax-1,2*yMax-1,1));
 
   return lines
 }
@@ -256,6 +300,8 @@ function showGrid(){
 
 // maintain a list of grid squares which have been deleted and reflect the knot
 var removedPoints = [];
+
+console.log(pointsAreEqual([1,0],[1,0]))
 
 // start the page with an existing drawing
 getValues()
