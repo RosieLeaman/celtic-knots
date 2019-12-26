@@ -26,14 +26,47 @@ function convertGridPointsToKnotPoints(list){
   return [pointsReflectX,pointsReflectY]
 }
 
+function getBottomKnotPoints(list){
+  // only open ones!
+  var bottomKnotPoints = [];
+  for (var i=0;i < list.length; i ++){
+    var x = list[i][0];
+    var y = list[i][1];
+
+    var bottomX = 2*x + 1;
+    var bottomY = 2*(y+1);
+
+    // ensure the bottom point is not also a top point (cannot be reached in that case)
+    var allowed = true;
+    for (var j=0;j<list.length;j++){
+      var testX = list[j][0];
+      var testY = list[j][1];
+
+      var topX = 2*testX + 1;
+      var topY = 2*testY;
+
+      if (pointsAreEqual([bottomX,bottomY],[topX,topY])){
+        allowed = false;
+        break
+      }
+    }
+
+    if (allowed == true){
+      bottomKnotPoints.push([2*x+1,2*(y+1)])
+    }
+  }
+
+  return bottomKnotPoints
+}
+
 function nextPoint(posX,posY,prevDirectionX,prevDirectionY,xMax,yMax){
-  // var gridPoints = [[1,1]];
-  var gridPoints = [];
+  var gridPoints = [[1,1],[1,2],[1,3],[2,1],[2,3],[1,1],[4,3],[4,1]];
+  // var gridPoints = [];
   var convertedGridPoints = convertGridPointsToKnotPoints(gridPoints);
   var pointsReflectX = convertedGridPoints[0];
   var pointsReflectY = convertedGridPoints[1];
 
-  console.log(posX + ' ' + posY + ' ' + prevDirectionX + ' ' + prevDirectionY)
+  // console.log(posX + ' ' + posY + ' ' + prevDirectionX + ' ' + prevDirectionY)
 
   // deal with reflecting in x
   if (posX + prevDirectionX >= xMax - 1 | posX + prevDirectionX <= 0){
@@ -72,16 +105,20 @@ function makePathFrom(initialPointX,initialPointY,xMax,yMax,startFlip){
   var prevDirectionY = -1;
 
   // to get the right curve from first point starts in a different orientation
-  if (initialPointX == 1){
+  if (initialPointY == 1 & initialPointX == 1){
     initialPointY = 2;
     prevDirectionX = -1;
     prevDirectionY = -1;
   }
-  else if (initialPointX == xMax){
+  else if (initialPointY == 1 & initialPointX == xMax){
     initialPointX = initialPointX - 2;
+  }
+  else if (initialPointY == 1 & initialPointX > 1 & initialPointX < xMax){
+    initialPointX = initialPointX - 1;
   }
   else{
     initialPointX = initialPointX - 1;
+    initialPointY = initialPointY + 1;
   }
 
   var posX = initialPointX;
@@ -97,7 +134,7 @@ function makePathFrom(initialPointX,initialPointY,xMax,yMax,startFlip){
   var repeatedVisits = 0
   while (repeatedVisits < maxVisits){
     var next = nextPoint(posX,posY,prevDirectionX,prevDirectionY,xMax,yMax);
-    console.log(next)
+    // console.log(next)
 
     posX = next[0],posY = next[1], prevDirectionX = next[2], prevDirectionY = next[3],toFlip = next[4];
 
@@ -139,22 +176,47 @@ function findNextEdgePoint(lines,xMax){
       }
     }
     if (found == false){
-      return x
+      return [x,1]
     }
   }
+
+  // now check any missing bottom grid points
+  var gridPoints = [[1,1],[1,2],[1,3],[2,1],[2,3],[1,1],[4,3],[4,1]];
+  var bottomKnotPoints = getBottomKnotPoints(gridPoints)
+
+  for (var x=1;x<bottomKnotPoints.length;x++){
+    var found = false;
+    for (var i=0;i<lines.length;i++){
+      // check each line
+      for (var j=0;j<lines[i].length;j++){
+        // check each point
+        if (lines[i][j].y == bottomKnotPoints[x][1] & lines[i][j].x == bottomKnotPoints[x][0]){
+          found = true;
+          break
+        }
+      }
+    }
+    if (found == false){
+      return bottomKnotPoints[x]
+    }
+  }
+
   return null
 }
 
 function makePath(xMax,yMax){
   var lines = [];
 
-  var initialPointY = 1;
+  var initialPoints = findNextEdgePoint(lines,xMax);
 
-  initialPointX = findNextEdgePoint(lines,xMax);
+  while (initialPoints !== null){
 
-  while (initialPointX !== null){
+    var initialPointX = initialPoints[0];
+    var initialPointY = initialPoints[1];
+
     lines.push(makePathFrom(initialPointX,initialPointY,2*xMax-1,2*yMax-1,1));
-    initialPointX = findNextEdgePoint(lines,xMax);
+
+    var initialPoints = findNextEdgePoint(lines,xMax);
   }
 
   // lines.push(makePathFrom(initialPointX,initialPointY,2*xMax-1,2*yMax-1,1));
@@ -300,8 +362,6 @@ function showGrid(){
 
 // maintain a list of grid squares which have been deleted and reflect the knot
 var removedPoints = [];
-
-console.log(pointsAreEqual([1,0],[1,0]))
 
 // start the page with an existing drawing
 getValues()
