@@ -151,7 +151,14 @@ function drawAllPaths(lines,gapX,gapY){
   }
 }
 
+function deleteGridSquare(point){
+  console.log('deleting')
+}
+
 function getValues(){
+  // reset the removed points
+  removedPoints = [];
+
   // note have to add 1 to the x and y size as user specifies num boxes whereas
   // code works off num fenceposts
   var sizeX = parseInt(document.getElementById("sizeX").value) + 1;
@@ -209,12 +216,10 @@ function showGrid(){
       .attr("class","edit-button")
       .on("click",function(){
         if (d3.select(".controls").classed("edit-mode")){
-          console.log('Leaving edit mode');
           d3.select(".controls").classed("edit-mode",false);
           d3.select(this).text("Edit grid");
         }
         else{
-          console.log('Entering edit mode');
           d3.select(".controls").classed("edit-mode",true);
           d3.select(this).text("Stop editing");
         }
@@ -245,22 +250,8 @@ function showGrid(){
             .attr("class","grid")
 }
 
-var sizeX = 7
-var sizeY = 6
-var gapX = 50
-var gapY = 50
+// maintain a list of grid squares which have been deleted and reflect the knot
+var removedPoints = [];
 
-svgContainer = d3.select("body")
-                 .append("svg")
-                 .attr("width",(sizeX-1)*gapX)
-                 .attr("height",(sizeY-1)*gapY)
-                 .on("click", function() {
-                    var clickedPoint = d3.mouse(this);
-                    console.log(Math.floor(clickedPoint[0]/gapX) + ' ' + Math.floor(clickedPoint[1]/gapY))
-                    return [Math.floor(clickedPoint[0]/gapX),Math.floor(clickedPoint[1]/gapY)]
-                  })
-
-                 // make the line path
-                 var linePaths = makePath(sizeX,sizeY)
-
-                 drawAllPaths(linePaths,gapX/2,gapY/2)
+// start the page with an existing drawing
+getValues()
