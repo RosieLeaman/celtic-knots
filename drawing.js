@@ -184,7 +184,9 @@ function findNextEdgePoint(lines,xMax){
   var gridPoints = [[1,1],[1,2],[1,3],[2,1],[2,3],[1,1],[4,3],[4,1]];
   var bottomKnotPoints = getBottomKnotPoints(gridPoints)
 
-  for (var x=1;x<bottomKnotPoints.length;x++){
+  console.log(bottomKnotPoints)
+
+  for (var x=0;x<bottomKnotPoints.length;x++){
     var found = false;
     for (var i=0;i<lines.length;i++){
       // check each line
