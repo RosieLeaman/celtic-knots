@@ -2,6 +2,13 @@ function getRndInteger(min, max) {
   return Math.floor(Math.random() * (max - min) ) + min;
 }
 
+function pointsAreEqual(point1,point2){
+  if (point1[0] == point2[0] & point1[1] == point2[1]){
+    return true
+  }
+  return false
+}
+
 function nextPoint(posX,posY,prevDirectionX,prevDirectionY,xMax,yMax){
   // if currentDirection is fine then move along
   if (posX + prevDirectionX < xMax & posX + prevDirectionX >= 0 & posY + prevDirectionY < yMax & posY + prevDirectionY >= 0){
@@ -144,28 +151,6 @@ function drawAllPaths(lines,gapX,gapY){
   }
 }
 
-function drawCircles(sizeX,sizeY,gapX,gapY){
-  var circleRadii = []
-  for (var i=0;i<sizeX*sizeY;i++){
-    circleRadii.push(5);
-  }
-
-  circles = svgContainer.selectAll("circle")
-                        .data(circleRadii)
-
-  circles.enter()
-         .append("circle")
-         .attr("cx",function(d,i){
-           return gapX*(i%sizeX);
-         })
-         .attr("cy",function(d,i){
-           return gapY*(Math.floor(i/sizeX)%sizeY);
-         })
-         .attr("r",function(d){
-           return d;
-         })
-}
-
 function getValues(){
   // note have to add 1 to the x and y size as user specifies num boxes whereas
   // code works off num fenceposts
@@ -183,6 +168,12 @@ function getValues(){
                    .append("svg")
                    .attr("width",(sizeX-1)*gapX)
                    .attr("height",(sizeY-1)*gapY)
+
+                   .on("click", function() {
+                     var clickedPoint = d3.mouse(this);
+                     console.log(Math.floor(clickedPoint[0]/gapX) + ' ' + Math.floor(clickedPoint[1]/gapY))
+                     return [Math.floor(clickedPoint[0]/gapX),Math.floor(clickedPoint[1]/gapY)]
+                    })
 
   // make the line path
   var linePaths = makePath(sizeX,sizeY)
@@ -210,6 +201,28 @@ function showGrid(){
     for (var i=0;i<=sizeY;i++){
       lines.push([{'x':0,'y':gapY*i},{'x':gapX*sizeX,'y':gapY*i}]);
     }
+
+    // add a button for removing rectangles
+    d3.select(".controls")
+      .append("button")
+      .text("Edit grid")
+      .attr("class","edit-button")
+      .on("click",function(){
+        if (d3.select(".controls").classed("edit-mode")){
+          console.log('Leaving edit mode');
+          d3.select(".controls").classed("edit-mode",false);
+          d3.select(this).text("Edit grid");
+        }
+        else{
+          console.log('Entering edit mode');
+          d3.select(".controls").classed("edit-mode",true);
+          d3.select(this).text("Stop editing");
+        }
+      })
+  }
+  else{
+    d3.select(".edit-button")
+      .remove()
   }
 
   // draw the lines
@@ -241,6 +254,11 @@ svgContainer = d3.select("body")
                  .append("svg")
                  .attr("width",(sizeX-1)*gapX)
                  .attr("height",(sizeY-1)*gapY)
+                 .on("click", function() {
+                    var clickedPoint = d3.mouse(this);
+                    console.log(Math.floor(clickedPoint[0]/gapX) + ' ' + Math.floor(clickedPoint[1]/gapY))
+                    return [Math.floor(clickedPoint[0]/gapX),Math.floor(clickedPoint[1]/gapY)]
+                  })
 
                  // make the line path
                  var linePaths = makePath(sizeX,sizeY)
