@@ -1,3 +1,5 @@
+// consider moving from where the values are got only into the drawing function
+
 function getRndInteger(min, max) {
   return Math.floor(Math.random() * (max - min) ) + min;
 }
@@ -164,6 +166,7 @@ function makePathFrom(initialPointX,initialPointY,xMax,yMax,startFlip){
 function findNextEdgePoint(lines,xMax){
   // investigate the top line, if all points have been visited (if region has no holes) then we are done
   for (var x=1;x<2*xMax-1;x=x+2){
+    console.log(x)
     var found = false;
     for (var i=0;i<lines.length;i++){
       // check each line
@@ -175,8 +178,28 @@ function findNextEdgePoint(lines,xMax){
         }
       }
     }
+    if (x==3){
+      console.log(found)
+    }
+
     if (found == false){
-      return [x,1]
+      // check the top edge point is allowed!
+      var allowed = true;
+      for (var i=0;i<removedPoints.length;i++){
+        if (removedPoints[i][1] == 0 & 2*removedPoints[i][0] + 1 == x){
+          allowed = false;
+          break
+        }
+      }
+      if (x==3){
+        console.log(removedPoints)
+        console.log(allowed)
+      }
+      if (allowed == true){
+        console.log('returning ' + x)
+        return [x,1]
+      }
+
     }
   }
 
@@ -184,9 +207,8 @@ function findNextEdgePoint(lines,xMax){
   // var gridPoints = [[1,1],[1,2],[1,3],[2,1],[2,3],[1,1],[4,3],[4,1]];
   var bottomKnotPoints = getBottomKnotPoints(removedPoints)
 
-  console.log(bottomKnotPoints)
-
   for (var x=0;x<bottomKnotPoints.length;x++){
+    // only check not top line ones as these have been done already
     var found = false;
     for (var i=0;i<lines.length;i++){
       // check each line
@@ -199,6 +221,7 @@ function findNextEdgePoint(lines,xMax){
       }
     }
     if (found == false){
+      console.log('here returning ' + bottomKnotPoints[x])
       return bottomKnotPoints[x]
     }
   }
@@ -295,12 +318,12 @@ function drawKnots(){
   // make the line path
   var linePaths = makePath(sizeX,sizeY)
 
-  console.log(linePaths)
-
   drawAllPaths(linePaths,gapX/2,gapY/2)
 }
 
 function makeSVG(){
+  // reset the removed points
+  removedPoints = [];
 
   var values = getValues()
   var sizeX = values[0]
@@ -412,7 +435,7 @@ function getValues(){
 }
 
 // maintain a list of grid squares which have been deleted and reflect the knot
-var removedPoints = [];
+removedPoints = [];
 // removedPoints = [[1,1],[1,2],[1,3],[2,1],[2,3],[1,1],[4,3],[4,1]];
 
 // start the page with an existing drawing
