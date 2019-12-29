@@ -59,10 +59,10 @@ function getBottomKnotPoints(list){
   return bottomKnotPoints
 }
 
-function nextPoint(posX,posY,prevDirectionX,prevDirectionY,xMax,yMax){
-  var gridPoints = [[1,1],[1,2],[1,3],[2,1],[2,3],[1,1],[4,3],[4,1]];
+function nextPoint(posX,posY,prevDirectionX,prevDirectionY,xMax,yMax,removedPoints){
+  // var gridPoints = [[1,1],[1,2],[1,3],[2,1],[2,3],[1,1],[4,3],[4,1]];
   // var gridPoints = [];
-  var convertedGridPoints = convertGridPointsToKnotPoints(gridPoints);
+  var convertedGridPoints = convertGridPointsToKnotPoints(removedPoints);
   var pointsReflectX = convertedGridPoints[0];
   var pointsReflectY = convertedGridPoints[1];
 
@@ -97,7 +97,7 @@ function nextPoint(posX,posY,prevDirectionX,prevDirectionY,xMax,yMax){
   return null
 }
 
-function makePathFrom(initialPointX,initialPointY,xMax,yMax,startFlip){
+function makePathFrom(initialPointX,initialPointY,xMax,yMax,startFlip,removedPoints){
   // if we are back where we started then we have finished, we have to come back twice
   // to be complete
   var maxVisits = 2;
@@ -133,7 +133,7 @@ function makePathFrom(initialPointX,initialPointY,xMax,yMax,startFlip){
 
   var repeatedVisits = 0
   while (repeatedVisits < maxVisits){
-    var next = nextPoint(posX,posY,prevDirectionX,prevDirectionY,xMax,yMax);
+    var next = nextPoint(posX,posY,prevDirectionX,prevDirectionY,xMax,yMax,removedPoints);
     // console.log(next)
 
     posX = next[0],posY = next[1], prevDirectionX = next[2], prevDirectionY = next[3],toFlip = next[4];
@@ -161,7 +161,7 @@ function makePathFrom(initialPointX,initialPointY,xMax,yMax,startFlip){
   return lineData
 }
 
-function findNextEdgePoint(lines,xMax){
+function findNextEdgePoint(lines,xMax,removedPoints){
   // investigate the top line, if all points have been visited (if region has no holes) then we are done
   for (var x=1;x<2*xMax-1;x=x+2){
     var found = false;
@@ -181,8 +181,9 @@ function findNextEdgePoint(lines,xMax){
   }
 
   // now check any missing bottom grid points
-  var gridPoints = [[1,1],[1,2],[1,3],[2,1],[2,3],[1,1],[4,3],[4,1]];
-  var bottomKnotPoints = getBottomKnotPoints(gridPoints)
+  // var gridPoints = [[1,1],[1,2],[1,3],[2,1],[2,3],[1,1],[4,3],[4,1]];
+  console.log(removedPoints)
+  var bottomKnotPoints = getBottomKnotPoints(removedPoints)
 
   console.log(bottomKnotPoints)
 
@@ -206,19 +207,19 @@ function findNextEdgePoint(lines,xMax){
   return null
 }
 
-function makePath(xMax,yMax){
+function makePath(xMax,yMax,removedPoints){
   var lines = [];
 
-  var initialPoints = findNextEdgePoint(lines,xMax);
+  var initialPoints = findNextEdgePoint(lines,xMax,removedPoints);
 
   while (initialPoints !== null){
 
     var initialPointX = initialPoints[0];
     var initialPointY = initialPoints[1];
 
-    lines.push(makePathFrom(initialPointX,initialPointY,2*xMax-1,2*yMax-1,1));
+    lines.push(makePathFrom(initialPointX,initialPointY,2*xMax-1,2*yMax-1,1,removedPoints));
 
-    var initialPoints = findNextEdgePoint(lines,xMax);
+    var initialPoints = findNextEdgePoint(lines,xMax,removedPoints);
   }
 
   // lines.push(makePathFrom(initialPointX,initialPointY,2*xMax-1,2*yMax-1,1));
@@ -295,7 +296,7 @@ function drawKnot(removedPoints){
                     })
 
   // make the line path
-  var linePaths = makePath(sizeX,sizeY)
+  var linePaths = makePath(sizeX,sizeY,removedPoints)
 
   drawAllPaths(linePaths,gapX/2,gapY/2)
 }
@@ -363,7 +364,8 @@ function showGrid(){
 }
 
 // maintain a list of grid squares which have been deleted and reflect the knot
-var removedPoints = [];
+// var removedPoints = [];
+var removedPoints = [[1,1],[1,2],[1,3],[2,1],[2,3],[1,1],[4,3],[4,1]];
 
 // start the page with an existing drawing
 drawKnot(removedPoints)
