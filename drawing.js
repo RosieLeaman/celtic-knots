@@ -249,7 +249,8 @@ function drawPath(lineData,gapX,gapY,colour){
                               .attr("d", lineFunction(lineDataCopy))
                               .attr("stroke", colour)
                               .attr("stroke-width", 5)
-                              .attr("fill", "none");
+                              .attr("fill", "none")
+                              .attr("class","knot")
 }
 
 function drawAllPaths(lines,gapX,gapY){
@@ -277,21 +278,35 @@ function deleteGridSquare(point){
     removedPoints.splice(index,1);
   }
 
-  // redraw the knot
-  drawKnot()
+  removeKnots()
 }
 
-function drawKnot(){
-  // reset the removed points
-  // removedPoints = [];
+function removeKnots(){
+  d3.select("svg").selectAll("path").filter(".knot").remove()
+}
 
-  // note have to add 1 to the x and y size as user specifies num boxes whereas
-  // code works off num fenceposts
-  var sizeX = parseInt(document.getElementById("sizeX").value) + 1;
-  var sizeY = parseInt(document.getElementById("sizeY").value) + 1;
+function drawKnots(){
+  var values = getValues()
+  var sizeX = values[0]
+  var sizeY = values[1]
+  var gapX = values[2]
+  var gapY = values[3]
 
-  var gapX = parseInt(document.getElementById("gapX").value);
-  var gapY = parseInt(document.getElementById("gapY").value);
+  // make the line path
+  var linePaths = makePath(sizeX,sizeY)
+
+  console.log(linePaths)
+
+  drawAllPaths(linePaths,gapX/2,gapY/2)
+}
+
+function makeSVG(){
+
+  var values = getValues()
+  var sizeX = values[0]
+  var sizeY = values[1]
+  var gapX = values[2]
+  var gapY = values[3]
 
   // get out of edit mode and remove the edit button if present so it doesn't screw stuff up
   d3.select(".controls").classed("edit-mode",false)
@@ -309,25 +324,26 @@ function drawKnot(){
                    .on("click", function() {
                      var clickedPoint = d3.mouse(this);
                      // only remove if in editing mode
-                     
-                     console.log(Math.floor(clickedPoint[0]/gapX) + ' ' + Math.floor(clickedPoint[1]/gapY))
-                     deleteGridSquare([Math.floor(clickedPoint[0]/gapX),Math.floor(clickedPoint[1]/gapY)])
+                     if (d3.select(".controls").classed("edit-mode") == true){
+                       console.log(Math.floor(clickedPoint[0]/gapX) + ' ' + Math.floor(clickedPoint[1]/gapY))
+                       deleteGridSquare([Math.floor(clickedPoint[0]/gapX),Math.floor(clickedPoint[1]/gapY)])
 
+                       // remove existing knot and draw again
+                       removeKnots()
+                       drawKnots()
+                     }
                     })
 
-  // make the line path
-  var linePaths = makePath(sizeX,sizeY)
+  drawKnots()
 
-  drawAllPaths(linePaths,gapX/2,gapY/2)
 }
 
 function showGrid(){
-  var sizeX = parseInt(document.getElementById("sizeX").value) + 1;
-  var sizeY = parseInt(document.getElementById("sizeY").value) + 1;
-
-  var gapX = parseInt(document.getElementById("gapX").value);
-  var gapY = parseInt(document.getElementById("gapY").value);
-
+  var values = getValues()
+  var sizeX = values[0]
+  var sizeY = values[1]
+  var gapX = values[2]
+  var gapY = values[3]
 
   var lines = [];
 
@@ -383,9 +399,21 @@ function showGrid(){
             .attr("class","grid")
 }
 
+function getValues(){
+  // note have to add 1 to the x and y size as user specifies num boxes whereas
+  // code works off num fenceposts
+  var sizeX = parseInt(document.getElementById("sizeX").value) + 1;
+  var sizeY = parseInt(document.getElementById("sizeY").value) + 1;
+
+  var gapX = parseInt(document.getElementById("gapX").value);
+  var gapY = parseInt(document.getElementById("gapY").value);
+
+  return [sizeX,sizeY,gapX,gapY]
+}
+
 // maintain a list of grid squares which have been deleted and reflect the knot
-// var removedPoints = [];
-removedPoints = [[1,1],[1,2],[1,3],[2,1],[2,3],[1,1],[4,3],[4,1]];
+var removedPoints = [];
+// removedPoints = [[1,1],[1,2],[1,3],[2,1],[2,3],[1,1],[4,3],[4,1]];
 
 // start the page with an existing drawing
-drawKnot()
+makeSVG()
