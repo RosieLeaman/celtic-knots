@@ -260,8 +260,25 @@ function drawAllPaths(lines,gapX,gapY){
 }
 
 function deleteGridSquare(point){
-  console.log('deleting')
-  console.log(removedPoints)
+  // check if the point has already been removed, as then add back
+  var found = false;
+  var index = -1;
+  for (var i=0; i < removedPoints.length; i ++){
+    if (pointsAreEqual(point,removedPoints[i])){
+      found = true;
+      index = i;
+      break
+    }
+  }
+  if (found == false){
+    removedPoints.push(point);
+  }
+  else{
+    removedPoints.splice(index,1);
+  }
+
+  // redraw the knot
+  drawKnot()
 }
 
 function drawKnot(){
@@ -291,8 +308,11 @@ function drawKnot(){
 
                    .on("click", function() {
                      var clickedPoint = d3.mouse(this);
+                     // only remove if in editing mode
+                     
                      console.log(Math.floor(clickedPoint[0]/gapX) + ' ' + Math.floor(clickedPoint[1]/gapY))
                      deleteGridSquare([Math.floor(clickedPoint[0]/gapX),Math.floor(clickedPoint[1]/gapY)])
+
                     })
 
   // make the line path
