@@ -263,9 +263,9 @@ function deleteGridSquare(point){
   console.log('deleting')
 }
 
-function getValues(){
+function drawKnot(removedPoints){
   // reset the removed points
-  removedPoints = [];
+  // removedPoints = [];
 
   // note have to add 1 to the x and y size as user specifies num boxes whereas
   // code works off num fenceposts
@@ -366,4 +366,4 @@ function showGrid(){
 var removedPoints = [];
 
 // start the page with an existing drawing
-getValues()
+drawKnot(removedPoints)
