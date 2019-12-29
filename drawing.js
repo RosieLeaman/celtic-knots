@@ -108,7 +108,7 @@ function makePathFrom(initialPointX,initialPointY,xMax,yMax,startFlip){
 
   // to get the right curve from first point starts in a different orientation
   if (initialPointY == 1 & initialPointX == 1){
-    initialPointY = 2;
+    initialPointY = initialPointY + 1;
     prevDirectionX = -1;
     prevDirectionY = -1;
   }
@@ -166,7 +166,6 @@ function makePathFrom(initialPointX,initialPointY,xMax,yMax,startFlip){
 function findNextEdgePoint(lines,xMax){
   // investigate the top line, if all points have been visited (if region has no holes) then we are done
   for (var x=1;x<2*xMax-1;x=x+2){
-    console.log(x)
     var found = false;
     for (var i=0;i<lines.length;i++){
       // check each line
@@ -178,9 +177,6 @@ function findNextEdgePoint(lines,xMax){
         }
       }
     }
-    if (x==3){
-      console.log(found)
-    }
 
     if (found == false){
       // check the top edge point is allowed!
@@ -191,12 +187,7 @@ function findNextEdgePoint(lines,xMax){
           break
         }
       }
-      if (x==3){
-        console.log(removedPoints)
-        console.log(allowed)
-      }
       if (allowed == true){
-        console.log('returning ' + x)
         return [x,1]
       }
 
