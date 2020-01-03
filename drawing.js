@@ -112,7 +112,7 @@ function makePathFrom(initialPointX,initialPointY,xMax,yMax,startFlip){
 
   // if the start location is invalid, we have to process around
   var attempts = 0;
-  while (attempts < 2){
+  while (attempts <= 2){
     var valid = true;
     if (initialPointX == 0){
       valid = false;
@@ -145,7 +145,7 @@ function makePathFrom(initialPointX,initialPointY,xMax,yMax,startFlip){
     }
   }
 
-  if (attempts == 2){
+  if (attempts == 3){
     // this is a circle, need to return something
     // return a diamond
     initialPointX = initialPointX - 1;
