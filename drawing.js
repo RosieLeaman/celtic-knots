@@ -62,13 +62,9 @@ function getBottomKnotPoints(list){
 }
 
 function nextPoint(posX,posY,prevDirectionX,prevDirectionY,xMax,yMax){
-  // var gridPoints = [[1,1],[1,2],[1,3],[2,1],[2,3],[1,1],[4,3],[4,1]];
-  // var gridPoints = [];
   var convertedGridPoints = convertGridPointsToKnotPoints(removedPoints);
   var pointsReflectX = convertedGridPoints[0];
   var pointsReflectY = convertedGridPoints[1];
-
-  // console.log(posX + ' ' + posY + ' ' + prevDirectionX + ' ' + prevDirectionY)
 
   // deal with reflecting in x
   if (posX + prevDirectionX >= xMax - 1 | posX + prevDirectionX <= 0){
@@ -109,8 +105,6 @@ function makePathFrom(initialPointX,initialPointY,xMax,yMax,startFlip){
   // TO FIND A VALID START POSITION ATTEMPT THE LEFT SIDE, IF NOT POSSIBLE MOVE TO BOTTOM
   // IF NOT POSSIBLE, MOVE TO RIGHT, SHOULD COVER ALL CASES
 
-  console.log('making path from '+ initialPointX + ' ' + initialPointY + ' xmax:' + xMax + ' y max:' + yMax)
-
   // find invalid start locations (aka reflecting boundaries)
   var convertedGridPoints = convertGridPointsToKnotPoints(removedPoints);
   var pointsReflectX = convertedGridPoints[0];
@@ -119,7 +113,6 @@ function makePathFrom(initialPointX,initialPointY,xMax,yMax,startFlip){
   // if the start location is invalid, we have to process around
   var attempts = 0;
   while (attempts < 2){
-    console.log('testing ' +  initialPointX + ' ' + initialPointY )
     var valid = true;
     if (initialPointX == 0){
       valid = false;
@@ -153,20 +146,13 @@ function makePathFrom(initialPointX,initialPointY,xMax,yMax,startFlip){
   }
 
   if (attempts == 2){
-    // failure
-    console.log('failed')
-    return
+    // this is a circle, need to return something
+    // return a diamond
+    initialPointX = initialPointX - 1;
+    initialPointY = initialPointY - 1;
+    var lineData = [{"x":initialPointX-0.7,"y":initialPointY+1.6},{"x":initialPointX-0.5,"y":initialPointY+1.8},{"x":initialPointX-0.1,"y":initialPointY+1.9},{"x":initialPointX+0.2,"y":initialPointY+1.9},{"x":initialPointX+0.8,"y":initialPointY+1.5},{"x":initialPointX+0.8,"y":initialPointY+0.8},{"x":initialPointX,"y":initialPointY},{"x":initialPointX-0.8,"y":initialPointY+1},{"x":initialPointX,"y":initialPointY+1.6},{"x":initialPointX+0.4,"y":initialPointY+1},{"x":initialPointX,"y":initialPointY + 0.8}]
+    return lineData
   }
-
-  // to get the right curve from first point starts in a different orientation
-  // if (initialPointY == 1 & initialPointX == 1){
-  //   initialPointY = initialPointY + 1;
-  //   prevDirectionX = -1;
-  //   prevDirectionY = -1;
-  // }
-  // else if (initialPointY == 1 & initialPointX > 1 & initialPointX < xMax){
-  //   initialPointX = initialPointX - 1;
-  // }
 
   var posX = initialPointX;
   var posY = initialPointY;
@@ -241,7 +227,6 @@ function findNextEdgePoint(lines,xMax){
   }
 
   // now check any missing bottom grid points
-  // var gridPoints = [[1,1],[1,2],[1,3],[2,1],[2,3],[1,1],[4,3],[4,1]];
   var bottomKnotPoints = getBottomKnotPoints(removedPoints)
 
   for (var x=0;x<bottomKnotPoints.length;x++){
@@ -258,7 +243,6 @@ function findNextEdgePoint(lines,xMax){
       }
     }
     if (found == false){
-      console.log('here returning ' + bottomKnotPoints[x])
       // note we return the y co-ordinate plus 1 so that it is already in the right y level
       return [bottomKnotPoints[x][0]-1,bottomKnotPoints[x][1] + 1]
     }
@@ -281,8 +265,6 @@ function makePath(xMax,yMax){
 
     var initialPoints = findNextEdgePoint(lines,xMax);
   }
-
-  // lines.push(makePathFrom(initialPointX,initialPointY,2*xMax-1,2*yMax-1,1));
 
   return lines
 }
@@ -474,7 +456,6 @@ function getValues(){
 
 // maintain a list of grid squares which have been deleted and reflect the knot
 removedPoints = [];
-// removedPoints = [[1,1],[1,2],[1,3],[2,1],[2,3],[1,1],[4,3],[4,1]];
 
 // start the page with an existing drawing
 makeSVG()
