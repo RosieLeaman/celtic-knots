@@ -114,7 +114,7 @@ function makePathFrom(initialPointX,initialPointY,xMax,yMax,startFlip){
   var attempts = 0;
   while (attempts <= 2){
     var valid = true;
-    if (initialPointX == 0){
+    if (initialPointX == 0 | initialPointX == xMax-1 | initialPointY == yMax-1){
       valid = false;
     }
     else{
@@ -196,7 +196,6 @@ function makePathFrom(initialPointX,initialPointY,xMax,yMax,startFlip){
 
 function findNextEdgePoint(lines,xMax){
   // investigate the top line, if all points have been visited (if region has no holes) then we are done
-  console.log(lines)
   for (var x=1;x<2*xMax-1;x=x+2){
     var found = false;
     for (var i=0;i<lines.length;i++){
@@ -368,7 +367,6 @@ function makeSVG(){
                      var clickedPoint = d3.mouse(this);
                      // only remove if in editing mode
                      if (d3.select(".controls").classed("edit-mode") == true){
-                       console.log(Math.floor(clickedPoint[0]/gapX) + ' ' + Math.floor(clickedPoint[1]/gapY))
                        deleteGridSquare([Math.floor(clickedPoint[0]/gapX),Math.floor(clickedPoint[1]/gapY)])
 
                        // remove existing knot and draw again
