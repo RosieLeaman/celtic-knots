@@ -106,22 +106,67 @@ function makePathFrom(initialPointX,initialPointY,xMax,yMax,startFlip){
   var prevDirectionX = 1;
   var prevDirectionY = -1;
 
+  // TO FIND A VALID START POSITION ATTEMPT THE LEFT SIDE, IF NOT POSSIBLE MOVE TO BOTTOM
+  // IF NOT POSSIBLE, MOVE TO RIGHT, SHOULD COVER ALL CASES
+
+  console.log('making path from '+ initialPointX + ' ' + initialPointY + ' xmax:' + xMax + ' y max:' + yMax)
+
+  // find invalid start locations (aka reflecting boundaries)
+  var convertedGridPoints = convertGridPointsToKnotPoints(removedPoints);
+  var pointsReflectX = convertedGridPoints[0];
+  var pointsReflectY = convertedGridPoints[1];
+
+  // if the start location is invalid, we have to process around
+  var attempts = 0;
+  while (attempts < 2){
+    console.log('testing ' +  initialPointX + ' ' + initialPointY )
+    var valid = true;
+    if (initialPointX == 0){
+      valid = false;
+    }
+    else{
+      for (var i=0;i<pointsReflectX.length;i++){
+        if ((pointsAreEqual([initialPointX,initialPointY],pointsReflectX[i])) | pointsAreEqual([initialPointX,initialPointY],pointsReflectY[i])){
+          valid = false;
+          break
+        }
+      }
+    }
+    if (valid == true){
+      break
+    }
+    else{
+      if (attempts == 0){
+        initialPointX = initialPointX + 1;
+        initialPointY = initialPointY + 1;
+        prevDirectionX = -1;
+        prevDirectionY = -1;
+      }
+      else if (attempts == 1) {
+        initialPointX = initialPointX + 1;
+        initialPointY = initialPointY - 1;
+        prevDirectionX = -1;
+        prevDirectionY = 1;
+      }
+      attempts = attempts + 1;
+    }
+  }
+
+  if (attempts == 2){
+    // failure
+    console.log('failed')
+    return
+  }
+
   // to get the right curve from first point starts in a different orientation
-  if (initialPointY == 1 & initialPointX == 1){
-    initialPointY = initialPointY + 1;
-    prevDirectionX = -1;
-    prevDirectionY = -1;
-  }
-  else if (initialPointY == 1 & initialPointX == xMax){
-    initialPointX = initialPointX - 2;
-  }
-  else if (initialPointY == 1 & initialPointX > 1 & initialPointX < xMax){
-    initialPointX = initialPointX - 1;
-  }
-  else{
-    initialPointX = initialPointX - 1;
-    initialPointY = initialPointY + 1;
-  }
+  // if (initialPointY == 1 & initialPointX == 1){
+  //   initialPointY = initialPointY + 1;
+  //   prevDirectionX = -1;
+  //   prevDirectionY = -1;
+  // }
+  // else if (initialPointY == 1 & initialPointX > 1 & initialPointX < xMax){
+  //   initialPointX = initialPointX - 1;
+  // }
 
   var posX = initialPointX;
   var posY = initialPointY;
@@ -165,6 +210,7 @@ function makePathFrom(initialPointX,initialPointY,xMax,yMax,startFlip){
 
 function findNextEdgePoint(lines,xMax){
   // investigate the top line, if all points have been visited (if region has no holes) then we are done
+  console.log(lines)
   for (var x=1;x<2*xMax-1;x=x+2){
     var found = false;
     for (var i=0;i<lines.length;i++){
@@ -188,7 +234,7 @@ function findNextEdgePoint(lines,xMax){
         }
       }
       if (allowed == true){
-        return [x,1]
+        return [x-1,1]
       }
 
     }
@@ -213,7 +259,8 @@ function findNextEdgePoint(lines,xMax){
     }
     if (found == false){
       console.log('here returning ' + bottomKnotPoints[x])
-      return bottomKnotPoints[x]
+      // note we return the y co-ordinate plus 1 so that it is already in the right y level
+      return [bottomKnotPoints[x][0]-1,bottomKnotPoints[x][1] + 1]
     }
   }
 
